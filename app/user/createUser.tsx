@@ -1,75 +1,118 @@
-import { StyleSheet, Text, TextInput, View, Button } from 'react-native';
-import React, { useState } from 'react';
+import { StyleSheet, Text, TextInput, View, TouchableOpacity, ActivityIndicator } from "react-native";
+import React, { useState, useEffect } from "react";
+import { Picker } from "@react-native-picker/picker";
 import api from "../../api/api";
-import { useRouter } from "expo-router"; 
 
-export default function CreateUser() {
+interface CreateUserProps {
+  closeModal: () => void;
+  onCreate: () => void;
+}
+
+export default function CreateUser({ closeModal, onCreate }: CreateUserProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [roleId, setRoleId] = useState("");
+  const [roles, setRoles] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const router = useRouter(); 
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const res = await api.get("/roles");
+        setRoles(res.data.data);
+      } catch (error) {
+        console.log("Error get roles:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchRoles();
+  }, []);
 
-  const handleCreate = async () => {
-    if (!name || !email || !password) {
-      alert("Semua field wajib diisi");
-      return;
-    }
-
-    setLoading(true);
-
+  const handleSubmit = async () => {
     try {
       const res = await api.post("/users", {
         name,
         email,
-        password,
+        role_id: roleId,
       });
 
-      alert(res.data.message); 
-
-      setName("");
-      setEmail("");
-      setPassword("");
-
-      router.push("/");
-    } catch (err: any) {
-      console.error(err);
-      alert(err.response?.data?.message || "Terjadi kesalahan");
-    } finally {
-      setLoading(false);
+      console.log(res.data);
+      onCreate();
+      closeModal();
+    } catch (error) {
+      console.log(error);
+      alert("Terjadi kesalahan");
     }
   };
 
+  if (loading) {
+    return (
+      <View style={{ padding: 20 }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
+
   return (
-    <View style={{ padding: 20 }}>
-      <Text>Nama</Text>
+    <View style={styles.container}>
+      <Text style={styles.label}>Nama</Text>
       <TextInput
+        style={styles.input}
         value={name}
         onChangeText={setName}
-        style={{ borderWidth: 1, marginBottom: 10, padding: 5 }}
+        placeholder="Nama"
       />
 
-      <Text>Email</Text>
+      <Text style={styles.label}>Email</Text>
       <TextInput
+        style={styles.input}
         value={email}
         onChangeText={setEmail}
-        style={{ borderWidth: 1, marginBottom: 10, padding: 5 }}
+        placeholder="Email"
       />
 
-      <Text>Password</Text>
-      <TextInput
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-        style={{ borderWidth: 1, marginBottom: 10, padding: 5 }}
-      />
+      <Text style={styles.label}>Role</Text>
+      <View style={styles.pickerWrapper}>
+        <Picker
+          selectedValue={roleId}
+          onValueChange={(itemValue) => setRoleId(itemValue)}
+        >
+          <Picker.Item label="Pilih Role" value={0} />
+          {roles.map((role: any) => (
+            <Picker.Item key={role.id} label={role.name} value={role.id} />
+          ))}
+        </Picker>
+      </View>
 
-      <Button
-        title={loading ? "Loading..." : "Create User"}
-        onPress={handleCreate}
-        disabled={loading}
-      />
+      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+        <Text style={styles.btnText}>Create</Text>
+      </TouchableOpacity>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: { padding: 20 },
+  label: { marginBottom: 5, fontWeight: "600" },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    padding: 10,
+    borderRadius: 10,
+    marginBottom: 15,
+  },
+  pickerWrapper: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 10,
+    marginBottom: 15,
+  },
+  button: {
+    backgroundColor: "black",
+    padding: 14,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+  btnText: { color: "#fff", fontWeight: "bold" },
+});
