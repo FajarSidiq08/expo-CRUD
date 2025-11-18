@@ -1,31 +1,34 @@
 import { StyleSheet, Text, TextInput, View, TouchableOpacity } from "react-native";
 import React, { useState } from "react";
-import api from "../../api/api";
+
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/state/store";
+import { createRole } from "@/state/roleSlice";
 
 interface CreateRoleProps {
   closeModal: () => void;
-  onCreate: () => void;
 }
 
-export default function CreateRole({ closeModal, onCreate }: CreateRoleProps) {
+export default function CreateRole({ closeModal }: CreateRoleProps) {
+  const dispatch = useDispatch<AppDispatch>();
   const [name, setName] = useState("");
 
   const handleSubmit = async () => {
-    try {
-      const res = await api.post("/roles", { name });
+    const data = { name };
 
-      console.log(res.data);
-      onCreate();
+    const result = await dispatch(createRole(data));
+
+    if (createRole.fulfilled.match(result)) {
       closeModal();
-    } catch (error) {
-      console.log(error);
-      alert("Terjadi kesalahan");
+    } else {
+      alert("Gagal membuat role");
     }
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Tambah Role</Text>
+
       <Text style={styles.label}>Nama Role</Text>
       <TextInput
         style={styles.input}
@@ -42,9 +45,7 @@ export default function CreateRole({ closeModal, onCreate }: CreateRoleProps) {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 20,
-  },
+  container: { padding: 20 },
 
   title: {
     fontSize: 22,

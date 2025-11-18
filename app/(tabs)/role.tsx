@@ -1,26 +1,28 @@
 import { View, StyleSheet, TouchableOpacity, Text, Modal, Pressable } from "react-native";
 import ListRole from "../role/listRole";
 import CreateRole from "../role/createRole";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import PullToRefresh from "@/components/pullToRefresh";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/state/store";
+import { fetchRole } from "@/state/roleSlice";
 
 export default function RolesTab() {
-  const [reloadKey, setReloadKey] = useState(0);
   const [modalVisible, setModalVisible] = useState(false);
 
-  const getRole = () => {
-    setReloadKey(prev => prev + 1);
+  const dispatch = useDispatch<AppDispatch>();
+  const handleRefresh = async () => {
+    await dispatch(fetchRole()).unwrap();
   };
 
-  const refreshData = async () => {
-    console.log("Refreshed!");
-    getRole();
-  };
+  useEffect(() => {
+    dispatch(fetchRole());
+  }, []);
 
   return (
     <View style={styles.container}>
-      <PullToRefresh onRefresh={refreshData}>
-        <ListRole reloadKey={reloadKey} />
+      <PullToRefresh onRefresh={handleRefresh}>
+        <ListRole />
       </PullToRefresh>
 
       <TouchableOpacity
@@ -42,7 +44,6 @@ export default function RolesTab() {
           <Pressable style={styles.modalContainer} onPress={() => { }}>
             <CreateRole
               closeModal={() => setModalVisible(false)}
-              onCreate={getRole}
             />
           </Pressable>
         </Pressable>

@@ -1,15 +1,12 @@
 import { StyleSheet, Text, TextInput, View, TouchableOpacity, Modal, ActivityIndicator } from "react-native";
 import React, { useState, useEffect } from "react";
-import api from "../../api/api";
+import { useDispatch } from "react-redux";
+import { updateRole } from "@/state/roleSlice";
+import { AppDispatch } from "@/state/store";
 
-interface UpdateRoleProps {
-  visible: boolean;
-  role: any;
-  onClose: () => void;
-  onUpdate: () => void;
-}
+export default function UpdateRole({ visible, role, onClose }: any) {
+  const dispatch = useDispatch<AppDispatch>();
 
-export default function UpdateRole({ visible, role, onClose, onUpdate }: UpdateRoleProps) {
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -20,30 +17,27 @@ export default function UpdateRole({ visible, role, onClose, onUpdate }: UpdateR
   }, [role]);
 
   const handleUpdate = async () => {
-    if (!name) {
+    if (!name.trim()) {
       alert("Nama wajib diisi");
       return;
     }
 
     setLoading(true);
 
-    try {
-      const response = await api.post("/roles", {
+    const result = await dispatch(
+      updateRole({
         id: role.id,
         name,
-      });
-
-      if (response.data.status === 200) {
-        onUpdate();
-        onClose();
-      } else {
-        alert(response.data.message || "Terjadi kesalahan");
-      }
-    } catch (error) {
-      alert("Terjadi kesalahan saat update role");
-    }
+      })
+    );
 
     setLoading(false);
+
+    if (updateRole.fulfilled.match(result)) {
+      onClose();
+    } else {
+      alert("Gagal mengupdate role");
+    }
   };
 
   return (
@@ -52,7 +46,7 @@ export default function UpdateRole({ visible, role, onClose, onUpdate }: UpdateR
         <View style={styles.modalBox}>
           <Text style={styles.title}>Update Role</Text>
 
-          <Text style={styles.label}>Nama</Text>
+          <Text style={styles.label}>Nama Role</Text>
           <TextInput
             placeholder="Nama"
             style={styles.input}
@@ -99,6 +93,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     textAlign: "center",
   },
+  label: { marginBottom: 5, fontWeight: "600" },
   input: {
     borderWidth: 1,
     borderColor: "#ccc",
@@ -123,12 +118,5 @@ const styles = StyleSheet.create({
   btnText: {
     color: "white",
     fontWeight: "bold",
-  },
-  label: { marginBottom: 5, fontWeight: "600" },
-  pickerWrapper: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 10,
-    marginBottom: 15,
   },
 });
