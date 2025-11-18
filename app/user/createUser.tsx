@@ -56,6 +56,8 @@ export default function CreateUser({ closeModal, onCreate }: CreateUserProps) {
 
   return (
     <View style={styles.container}>
+      <Text style={styles.title}>Tambah User</Text>
+
       <Text style={styles.label}>Nama</Text>
       <TextInput
         style={styles.input}
@@ -115,4 +117,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   btnText: { color: "#fff", fontWeight: "bold" },
+  title: {
+    fontSize: 22,
+    fontWeight: "bold",
+    textAlign: "center",
+    marginBottom: 20,
+  },
 });

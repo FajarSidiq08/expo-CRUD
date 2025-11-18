@@ -1,20 +1,27 @@
-import { View, Text, TouchableOpacity, StyleSheet, Modal, Pressable } from "react-native";
-import ListUser from "./user/listUser";
-import React, { useState } from "react";
-import CreateUser from "./user/createUser";
+import { View, StyleSheet, TouchableOpacity, Text, Modal, Pressable } from "react-native";
+import ListRole from "../role/listRole";
+import CreateRole from "../role/createRole";
+import { useState } from "react";
+import PullToRefresh from "@/components/pullToRefresh";
 
-export default function Index() {
-  const [modalVisible, setModalVisible] = useState(false);
+export default function RolesTab() {
   const [reloadKey, setReloadKey] = useState(0);
+  const [modalVisible, setModalVisible] = useState(false);
 
-  const getUser = () => {
-    console.log("User berhasil dibuat");
+  const getRole = () => {
     setReloadKey(prev => prev + 1);
+  };
+
+  const refreshData = async () => {
+    console.log("Refreshed!");
+    getRole();
   };
 
   return (
     <View style={styles.container}>
-      <ListUser reloadKey={reloadKey} />
+      <PullToRefresh onRefresh={refreshData}>
+        <ListRole reloadKey={reloadKey} />
+      </PullToRefresh>
 
       <TouchableOpacity
         style={styles.floatingButton}
@@ -27,27 +34,27 @@ export default function Index() {
         animationType="slide"
         transparent={true}
         visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
       >
         <Pressable
           style={styles.modalBackground}
           onPress={() => setModalVisible(false)}
         >
           <Pressable style={styles.modalContainer} onPress={() => { }}>
-            <CreateUser
+            <CreateRole
               closeModal={() => setModalVisible(false)}
-              onCreate={getUser}
+              onCreate={getRole}
             />
           </Pressable>
         </Pressable>
       </Modal>
-    </View>
+    </View >
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingTop: 10,
   },
   floatingButton: {
     position: "absolute",
@@ -60,16 +67,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     elevation: 5,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
   },
   buttonText: {
     color: "#fff",
     fontSize: 30,
     fontWeight: "bold",
-    marginBottom: 4,
   },
   modalBackground: {
     flex: 1,

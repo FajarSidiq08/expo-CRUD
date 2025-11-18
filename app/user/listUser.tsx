@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { FlatList, Text, View, TouchableOpacity, Alert } from "react-native";
+import { FlatList, Text, View, TouchableOpacity, Alert, StyleSheet } from "react-native";
 import api from "../../api/api";
 import UpdateUser from "./updateUser";
+import { Feather } from '@expo/vector-icons';
 
 interface Role {
   id: number;
@@ -80,57 +81,46 @@ export default function ListUser({ reloadKey }: ListUserProps) {
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <View
-            style={{
-              padding: 10,
-              marginVertical: 5,
-              backgroundColor: "#f5f5f5",
-              borderRadius: 10,
-            }}
+            style={styles.card}
           >
-            <Text style={{ fontWeight: "bold", fontSize: 16 }}>
-              {item.name} ({item.role.name})
-            </Text>
-            <Text>{item.email}</Text>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontWeight: "bold", fontSize: 16 }}>
+                {item.name} ({item.role.name})
+              </Text>
+              <Text>{item.email}</Text>
 
-            <Text style={{ fontSize: 12, color: "gray", marginTop: 5 }}>
-              Dibuat: {new Date(item.created_at).toLocaleString()}
-            </Text>
+              <Text style={{ fontSize: 12, color: "gray", marginTop: 4 }}>
+                Dibuat: {new Date(item.created_at).toLocaleString()}
+              </Text>
+            </View>
 
             <View
               style={{
                 flexDirection: "row",
-                gap: 10,
-                marginTop: 10,
+                gap: 12,
+                marginLeft: 12,
               }}
             >
               <TouchableOpacity
                 onPress={() => openEdit(item)}
                 style={{
-                  flex: 1,
                   backgroundColor: "#007bff",
-                  padding: 8,
+                  padding: 10,
                   borderRadius: 8,
-                  alignItems: "center",
                 }}
               >
-                <Text style={{ color: "white", fontWeight: "bold" }}>
-                  Edit
-                </Text>
+                <Feather name="edit" size={20} color="#fff" />
               </TouchableOpacity>
 
               <TouchableOpacity
                 onPress={() => deleteUser(item.id)}
                 style={{
-                  flex: 1,
                   backgroundColor: "red",
-                  padding: 8,
+                  padding: 10,
                   borderRadius: 8,
-                  alignItems: "center",
                 }}
               >
-                <Text style={{ color: "white", fontWeight: "bold" }}>
-                  Delete
-                </Text>
+                <Feather name="trash-2" size={20} color="#fff" />
               </TouchableOpacity>
             </View>
           </View>
@@ -145,4 +135,21 @@ export default function ListUser({ reloadKey }: ListUserProps) {
       />
     </View>
   );
-}
+};
+
+const styles = StyleSheet.create({
+  card: {
+    padding: 15,
+    marginVertical: 6,
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 3,
+  },
+})
