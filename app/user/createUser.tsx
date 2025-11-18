@@ -2,18 +2,23 @@ import { StyleSheet, Text, TextInput, View, TouchableOpacity, ActivityIndicator 
 import React, { useState, useEffect } from "react";
 import { Picker } from "@react-native-picker/picker";
 import api from "../../api/api";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "@/state/store";
+import { createUser } from "@/state/userSlice";
 
 interface CreateUserProps {
   closeModal: () => void;
-  onCreate: () => void;
 }
 
-export default function CreateUser({ closeModal, onCreate }: CreateUserProps) {
+export default function CreateUser({ closeModal }: CreateUserProps) {
+  const dispatch = useDispatch<AppDispatch>();
+  const loading = useSelector((state: RootState) => state.user.loading);
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [roleId, setRoleId] = useState("");
   const [roles, setRoles] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingRoles, setLoadingRoles] = useState(true);
 
   useEffect(() => {
     const fetchRoles = async () => {
@@ -23,30 +28,29 @@ export default function CreateUser({ closeModal, onCreate }: CreateUserProps) {
       } catch (error) {
         console.log("Error get roles:", error);
       } finally {
-        setLoading(false);
+        setLoadingRoles(false);
       }
     };
     fetchRoles();
   }, []);
 
   const handleSubmit = async () => {
-    try {
-      const res = await api.post("/users", {
-        name,
-        email,
-        role_id: roleId,
-      });
+    const data = {
+      name,
+      email,
+      role_id: roleId,
+    };
 
-      console.log(res.data);
-      onCreate();
-      closeModal();
-    } catch (error) {
-      console.log(error);
-      alert("Terjadi kesalahan");
+    const result = await dispatch(createUser(data));
+
+    if (createUser.fulfilled.match(result)) {
+      closeModal(); // sukses → tutup modal
+    } else {
+      alert("Gagal membuat user");
     }
   };
 
-  if (loading) {
+  if (loadingRoles) {
     return (
       <View style={{ padding: 20 }}>
         <ActivityIndicator size="large" />
@@ -87,8 +91,12 @@ export default function CreateUser({ closeModal, onCreate }: CreateUserProps) {
         </Picker>
       </View>
 
-      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-        <Text style={styles.btnText}>Create</Text>
+      <TouchableOpacity style={styles.button} onPress={handleSubmit} disabled={loading}>
+        {loading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.btnText}>Create</Text>
+        )}
       </TouchableOpacity>
     </View>
   );
