@@ -12,7 +12,6 @@ export default function Login() {
 
   const handleLogin = async () => {
     const result = await dispatch(login({ email, password }));
-    console.log("RESULT:", result);
 
     if (login.fulfilled.match(result)) {
       router.replace("/");
