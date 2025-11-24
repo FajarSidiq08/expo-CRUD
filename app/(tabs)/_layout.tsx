@@ -1,11 +1,8 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Tabs } from 'expo-router';
-import { store } from '@/state/store';
-import { Provider } from 'react-redux';
 
 export default function TabLayout() {
   return (
-    <Provider store={store}>
       <Tabs screenOptions={{ tabBarActiveTintColor: 'blue' }}>
         <Tabs.Screen
           name="index"
@@ -29,6 +26,5 @@ export default function TabLayout() {
           }}
         />
       </Tabs>
-    </Provider>
   );
 }
